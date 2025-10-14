@@ -128,17 +128,8 @@ footer a {
 	position: relative;
 	margin-bottom: 0.5rem;
 }
-#channelbox .perma-placeholder {
-	position: absolute;
-	left: 0px;
-	top: 0px;
-	bottom: 0px;
-	padding: calc(0.5rem + 2px) 1rem;
-	opacity: 0.5;
-}
 #channelbox input {
 	padding: 0.5rem 1rem;
-	padding-left: 180px;
 	border: 2px solid var(--text);
 	border-radius: 0.5rem;
 }
