@@ -21,7 +21,7 @@
 					<input type="text" placeholder="id канала" class="flex-1" />
 					<button onClick="onJoin()">Начать</button>
 				</div>
-				<div class="small light">Ввод ID канала не обязателен - нажмите "Начать" для генерации случайного канала.</div>
+				<div class="small light">Введите ID канала, созданный Telegram-ботом, и нажмите "Начать".</div>
 			</div>
 
 
@@ -29,8 +29,10 @@
 				const inputElement = document.querySelector("#channelbox input");
 				function onJoin() {
 					let channelId = document.querySelector("#channelbox input").value;
-					if (!channelId) channelId = Math.random().toString(36).substr(2, 6);
-
+					if (!channelId) {
+						alert("Введите ID канала, созданный Telegram-ботом");
+						return;
+					}
 					window.location.pathname = channelId;
 				}
 

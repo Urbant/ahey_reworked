@@ -18,6 +18,7 @@ const server = http.createServer(app); // Create HTTP server with Express app
 app.set("view engine", "ejs");
 
 // Serve static files from Vue, assets, and www directories
+app.use(express.json());
 app.use(express.static(path.join(__dirname, "node_modules/vue/dist/")));
 app.use(express.static(path.join(__dirname, "public/icons")));
 app.use(express.static(path.join(__dirname, "public"), { maxAge: 0 })); // No cache for www

@@ -1,4 +1,6 @@
 const { isValidChannelName } = require("./utils");
+const botAuth = require("./middleware/botAuth");
+const { createConference, getConferenceById } = require("./services/conferences");
 
 const router = require("express").Router();
 
@@ -9,6 +11,19 @@ const STATIC_VIEWS = {
 
 // Route: Home page
 router.get("/", (req, res) => res.render("index", { page: "index", title: "Корпоративный веб сервис для видеозвонков. Без регистрации, без скачивания." }));
+
+// API: Create conference (bot only)
+router.post("/api/createConference", botAuth, (req, res) => {
+	try {
+		const telegramUserId = req.body?.telegramUserId;
+		const metadata = req.body?.metadata;
+		const { id } = createConference({ telegramUserId, metadata });
+		const origin = `${req.protocol}://${req.get("host")}`;
+		return res.status(201).json({ id, url: `${origin}/${id}` });
+	} catch (e) {
+		return res.status(400).json({ error: e.message || "bad_request" });
+	}
+});
 
 // MIddleware: Static views (terms, privacy, etc.)
 router.use("/:view", (req, res, next) => {
@@ -23,6 +38,12 @@ router.use("/:view", (req, res, next) => {
 router.get("/:channel", (req, res) => {
 	const channel = req.params.channel;
 	if (!isValidChannelName(channel)) {
+		return res.status(400).render("invalid", { page: "invalid-channel", title: "Неверное название канала" });
+	}
+
+	// Check that conference exists in DB
+	const conf = getConferenceById(channel);
+	if (!conf) {
 		return res.status(400).render("invalid", { page: "invalid-channel", title: "Неверное название канала" });
 	}
 
