@@ -2,6 +2,7 @@
 
 const crypto = require("crypto");
 const db = require("../db");
+const config = require("../config");
 const { isValidChannelName } = require("../utils");
 
 const selectByIdStmt = db.prepare("SELECT id, telegram_user_id, created_at, metadata FROM conferences WHERE id = ?");
@@ -12,6 +13,13 @@ const insertStmt = db.prepare(
 function getConferenceById(id) {
 	const row = selectByIdStmt.get(id);
 	if (!row) return null;
+
+	if (config.CONFERENCE_TTL_MINUTES !== null) {
+		const createdAt = new Date(row.created_at).getTime();
+		const expiresAt = createdAt + config.CONFERENCE_TTL_MINUTES * 60 * 1000;
+		if (Date.now() > expiresAt) return null;
+	}
+
 	return {
 		id: row.id,
 		telegramUserId: row.telegram_user_id,
@@ -51,5 +59,3 @@ function createConference({ telegramUserId, metadata }) {
 }
 
 module.exports = { createConference, getConferenceById };
-
-

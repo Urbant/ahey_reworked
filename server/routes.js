@@ -10,7 +10,12 @@ const STATIC_VIEWS = {
 };
 
 // Route: Home page
-router.get("/", (req, res) => res.render("index", { page: "index", title: "Корпоративный веб сервис для видеозвонков. Без регистрации, без скачивания." }));
+router.get("/", (req, res) =>
+	res.render("index", {
+		page: "index",
+		title: "Корпоративный веб сервис для видеозвонков. Без регистрации, без скачивания.",
+	})
+);
 
 // API: Create conference (bot only)
 router.post("/api/createConference", botAuth, (req, res) => {
@@ -38,13 +43,17 @@ router.use("/:view", (req, res, next) => {
 router.get("/:channel", (req, res) => {
 	const channel = req.params.channel;
 	if (!isValidChannelName(channel)) {
-		return res.status(400).render("invalid", { page: "invalid-channel", title: "Неверное название канала" });
+		return res
+			.status(400)
+			.render("invalid", { page: "invalid-channel", title: "Неверное название канала", reason: "invalid_name" });
 	}
 
 	// Check that conference exists in DB
 	const conf = getConferenceById(channel);
 	if (!conf) {
-		return res.status(400).render("invalid", { page: "invalid-channel", title: "Неверное название канала" });
+		return res
+			.status(404)
+			.render("invalid", { page: "invalid-channel", title: "Конференция не найдена", reason: "not_found" });
 	}
 
 	res.render("channel", { page: "channel", title: channel });
