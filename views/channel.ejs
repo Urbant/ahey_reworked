@@ -2,17 +2,20 @@
 <html lang="ru">
 	<%- include('head'); -%>
 
-	<body>
+	<body class="meeting-page">
 		<main id="app">
-			<div class="wrap max" v-cloak>
+			<div class="wrap max meeting-shell" :class="{'in-call':callInitiated,'before-call':!callInitiated}" v-cloak>
+ <header class="meeting-header"><div class="service-brand"><span class="brand-icon"><i class="icon-video" aria-hidden="true"></i></span><span>Наберёшь?</span></div><div class="meeting-context"><strong>Видеовстреча</strong><span>Душа Компании</span></div><span class="meeting-badge" v-if="callInitiated">Участников: {{peersArray.length + 1}}</span><span class="meeting-badge" v-else>Подготовка к звонку</span></header>
 				<section id="toast" v-bind:class="toast.type + (toast.message ? ' show' : '')" v-on:click="toast.message = ''">
 					{{toast.message}}
 				</section>
 
 				<section id="pre-call" v-if="!callInitiated">
+ <div class="precall-heading"><h1>Перед встречей</h1><p>Проверьте, как вас видно и слышно.</p></div>
 					<div id="videos" class="layout-1">
 						<div class="video self">
-							<video id="preCallVideo" class="video self" autoplay muted playsinline></video>
+							<div class="camera-placeholder" v-if="!videoEnabled"><span class="avatar-placeholder">{{(name || 'Вы').slice(0,1).toUpperCase()}}</span><span>Камера выключена</span></div>
+ <video id="preCallVideo" class="video self" autoplay muted playsinline></video>
 						</div>
 					</div>
 				</section>
@@ -36,7 +39,7 @@
 								autoplay
 								playsinline
 							></video>
-							<button class="fullscreen-btn" @click="requestFullscreen($refs['peerVideo' + i])">
+							<button aria-label="На весь экран" title="На весь экран" class="fullscreen-btn" @click="requestFullscreen($refs['peerVideo' + i])">
 								<i class="icon-maximize" aria-label="На весь экран"></i>
 							</button>
 							<div class="meta">
@@ -49,6 +52,7 @@
 
 				<div id="blanket" v-if="showExtraControls || showChat" @click="resetPopups"></div>
 				<section id="controls">
+ <div class="entry-heading" v-if="!callInitiated"><span class="entry-kicker">ВИДЕОВСТРЕЧА</span><h1>Присоединиться к коллегам</h1><p>Представьтесь и нажмите «Набрать».</p></div>
 					<section id="extra" v-if="showExtraControls">
 						<ul>
 							<li class="action" @click="showAudioDevices = !showAudioDevices">
@@ -81,15 +85,13 @@
 								{{videoDevice.label}}
 							</li>
 
-							<li class="action" v-if="screenShareSupported && callInitiated" v-on:click="toggleScreenShare">
-								<i class="icon-screen"></i> Показать экран
-							</li>
-							<li class="action" @click="copyURL"><i class="icon-link"></i> Скопировать URL канала</li>
+							<li class="action" @click="copyURL"><i class="icon-link"></i> Скопировать ссылку</li>
 							<li class="action red" @click="endCall" v-if="callInitiated"><i class="icon-phone-off"></i> Покинуть</li>
 						</ul>
 					</section>
 
-					<section id="chats" v-if="callInitiated && showChat">
+					<section id="chats" v-if="callInitiated && showChat" aria-label="Чат встречи">
+ <h2 class="chat-heading">Чат встречи</h2>
 						<div id="scroll">
 							<div class="chat" v-for="(chat, i) in chats" v-bind:key="i">
 								<div><span class="name">{{chat.name}}:</span> <span v-html="linkify(chat.message)"></span></div>
@@ -108,6 +110,7 @@
 					</section>
 
 					<section id="name" v-if="!callInitiated && !showExtraControls">
+ <label class="field-label" for="myName">Ваше имя</label>
 						<input
 							type="text"
 							id="myName" aria-label="Ваше имя"
@@ -120,19 +123,19 @@
 					</section>
 
 					<section id="buttons">
-						<button aria-label="Микрофон" @click="callInitiated ? toggleAudio() : togglePreCallAudio()">
+						<button aria-label="Микрофон" title="Микрофон" :aria-pressed="audioEnabled" :class="{'device-off':!audioEnabled}" @click="callInitiated ? toggleAudio() : togglePreCallAudio()">
 							<i :class="'icon-mic'+(audioEnabled ? '' : '-off')"></i>
 						</button>
-						<button aria-label="Камера" @click="callInitiated ? toggleVideo() : togglePreCallVideo()">
+						<button aria-label="Камера" title="Камера" :aria-pressed="videoEnabled" :class="{'device-off':!videoEnabled}" @click="callInitiated ? toggleVideo() : togglePreCallVideo()">
 							<i :class="'icon-video'+(videoEnabled ? '' : '-off')"></i>
 						</button>
-						<button @click="toggleChat" v-if="callInitiated && chatEnabled"><i class="icon-chat"></i></button>
-						<button @click="toggleScreenShare" v-if="isScreenSharing" class="red"><i class="icon-screen"></i></button>
-						<button aria-label="Настройки звонка" @click="toggleExtraControls"><i class="icon-more-vertical"></i></button>
+						<button :aria-label="isScreenSharing ? 'Остановить показ экрана' : 'Показать экран'" :title="isScreenSharing ? 'Остановить показ экрана' : 'Показать экран'" :aria-pressed="isScreenSharing" @click="toggleScreenShare" v-if="callInitiated && screenShareSupported" :class="{red:isScreenSharing}"><i class="icon-screen" aria-hidden="true"></i></button>
+						<button aria-label="Настройки звонка" title="Настройки звонка" @click="toggleExtraControls"><i class="icon-more-vertical"></i></button>
 						<button class="join" v-if="!callInitiated" v-on:click="initiateCall">
 							<i class="icon-phone"></i>&nbsp; Набрать
 						</button>
 					</section>
+ <p class="entry-help" v-if="!callInitiated">Камеру и микрофон можно выключить до входа.</p>
 				</section>
 			</div>
 		</main>

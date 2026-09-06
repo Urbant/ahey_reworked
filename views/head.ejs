@@ -12,7 +12,7 @@
 	<meta name="apple-mobile-web-app-status-bar-style" content="default" />
 	<meta name="mobile-web-app-capable" content="yes" />
 	<meta name="application-name" content="Наберёшь?" />
-	<meta name="theme-color" content="#000000" />
+	<meta name="theme-color" content="#f5f6f8" />
 
 	<!-- Meta data for link fetching -->
 	<meta property="og:url" content="https://call.motorzona.ru" />
@@ -26,6 +26,7 @@
 	<link rel="manifest" href="/manifest.json" />
 
 	<link rel="stylesheet" href="/styles.css" />
+	<link rel="stylesheet" href="/company-ui.css" />
 
 	<% if(page==="channel" ) { %>
 	<script defer src="/socket.io/socket.io.js"></script>
@@ -33,6 +34,7 @@
 	<script defer src="/ice-config.js"></script>
 	<script defer src="/peer.js"></script>
 	<script defer src="/app.js"></script>
+	<script defer src="/video-corners.js"></script>
 	<% } %>
 
 	<title>Наберёшь? / <%= title %></title>
