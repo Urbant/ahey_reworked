@@ -24,7 +24,7 @@ No tests are configured (`npm test` exits with error).
 
 ## Architecture
 
-Ahey is a browser-based WebRTC video conferencing app. The server only handles signalling — all audio/video streams travel peer-to-peer. Group calls use a **full mesh topology**: every participant opens a direct RTCPeerConnection to every other participant.
+naberesh is a browser-based WebRTC video conferencing app. The server only handles signalling — all audio/video streams travel peer-to-peer. Group calls use a **full mesh topology**: every participant opens a direct RTCPeerConnection to every other participant.
 
 ### Server (`server/`)
 
@@ -62,7 +62,7 @@ Runs before `init.js` in production only. Injects TURN server credentials into `
 | `PORT` | `824` | HTTP listen port |
 | `CORS_ORIGIN` | `http://localhost:824` | Comma-separated allowed origins for Socket.IO |
 | `BOT_API_SECRET` | — | Enables Telegram-bot-only conference creation; if unset, the `POST /api/createConference` endpoint returns 401 for all requests |
-| `DB_PATH` | `./data/ahey.db` | SQLite database file path |
+| `DB_PATH` | `./data/naberesh.db` | SQLite database file path |
 | `TURN_URL_UDP` / `TURN_URL_TCP` | — | Custom TURN server URLs (production only) |
 | `TURN_USERNAME` / `TURN_PASSWORD` | — | TURN credentials |
 

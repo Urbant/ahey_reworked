@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  ahey:
+  naberesh:
     build: .
     env_file:
       - .env
     environment:
       - NODE_ENV=production
-    container_name: ahey-app
+    container_name: naberesh-app
     restart: unless-stopped
     ports:
       - "824:824"

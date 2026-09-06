@@ -1,47 +1,10 @@
-/**
- * Ahey Service worker
- */
-
-const currentCacheName = "ahey-v-~VERSION~";
-
-self.addEventListener("install", function (e) {
-	console.log("Install event triggered. New updates available.");
-	const filesToCache = [
-		"/",
-		"/manifest.json",
-		"/styles.css",
-		"/vue.global.prod.js",
-		"/peer.js",
-		"/app.js",
-		"/socket.io/socket.io.js",
-		"/privacy",
-		"/terms",
-	];
-
-	// Deleting the previous version of cache
-	e.waitUntil(
-		caches.keys().then(function (cacheNames) {
-			return Promise.all(
-				cacheNames.filter((cacheName) => cacheName != currentCacheName).map((cacheName) => caches.delete(cacheName))
-			);
-		})
-	);
-
-	// add the files to cache
-	e.waitUntil(
-		caches.open(currentCacheName).then(function (cache) {
-			return cache.addAll(filesToCache);
-		})
-	);
+const currentCacheName = "naberesh-v3";
+self.addEventListener("install", event => { event.waitUntil(self.skipWaiting()); });
+self.addEventListener("activate", event => {
+ event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(key => key !== currentCacheName).map(key => caches.delete(key)))).then(() => self.clients.claim()));
 });
-
-self.addEventListener("fetch", function (event) {
-	event.respondWith(
-		caches
-			.match(event.request)
-			.then(function (cache) {
-				return cache || fetch(event.request);
-			})
-			.catch(() => {})
-	);
+// Calls, conference pages and temporary ICE credentials always require the network.
+self.addEventListener("fetch", event => {
+ if (event.request.method !== "GET" || new URL(event.request.url).origin !== self.location.origin) return;
+ event.respondWith(fetch(event.request));
 });

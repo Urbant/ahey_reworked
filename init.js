@@ -17,6 +17,12 @@ const server = http.createServer(app); // Create HTTP server with Express app
 // Set EJS as the view engine for rendering templates
 app.set("view engine", "ejs");
 
+const turn = require("./server/turn");
+app.get("/ice-config.js", (req, res) => {
+ res.type("application/javascript").set("Cache-Control", "no-store");
+ res.send('window.ICE_SERVERS = ' + JSON.stringify(turn.getIceServers()) + ';');
+});
+
 // Serve static files from Vue, assets, and www directories
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "node_modules/vue/dist/")));
@@ -36,7 +42,7 @@ io.sockets.on("connection", signallingServer);
 app.use("/", routes);
 
 // Start the server and log status
-server.listen(PORT, null, () => {
-	console.log("Ahey server started");
+server.listen(PORT, config.HOST, () => {
+	console.log("naberesh server started");
 	console.log({ port: PORT, node_version: process.versions.node });
 });

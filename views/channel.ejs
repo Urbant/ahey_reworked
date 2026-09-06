@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 	<%- include('head'); -%>
 
 	<body>
@@ -29,7 +29,7 @@
 							></video>
 							<div class="meta">{{name}} (Вы)</div>
 						</div>
-						<div class="video" v-for="(peer, i) in peersArray" v-bind:key="peerKey">
+						<div class="video" v-for="(peer, i) in peersArray" v-bind:key="peer.id || i">
 							<video
 								v-bind:ref="'peerVideo' + i"
 								v-bind:src-object.prop.camel="peer.stream"
@@ -37,7 +37,7 @@
 								playsinline
 							></video>
 							<button class="fullscreen-btn" @click="requestFullscreen($refs['peerVideo' + i])">
-								<i class="icon-maximize"></i>
+								<i class="icon-maximize" aria-label="На весь экран"></i>
 							</button>
 							<div class="meta">
 								{{peer.name}}
@@ -48,7 +48,7 @@
 				</section>
 
 				<div id="blanket" v-if="showExtraControls || showChat" @click="resetPopups"></div>
-				<secion id="controls">
+				<section id="controls">
 					<section id="extra" v-if="showExtraControls">
 						<ul>
 							<li class="action" @click="showAudioDevices = !showAudioDevices">
@@ -110,7 +110,7 @@
 					<section id="name" v-if="!callInitiated && !showExtraControls">
 						<input
 							type="text"
-							id="myName"
+							id="myName" aria-label="Ваше имя"
 							v-model="name"
 							v-on:keyup="updateName"
 							v-on:keyup.enter="initiateCall"
@@ -120,20 +120,20 @@
 					</section>
 
 					<section id="buttons">
-						<button @click="callInitiated ? toggleAudio() : togglePreCallAudio()">
+						<button aria-label="Микрофон" @click="callInitiated ? toggleAudio() : togglePreCallAudio()">
 							<i :class="'icon-mic'+(audioEnabled ? '' : '-off')"></i>
 						</button>
-						<button @click="callInitiated ? toggleVideo() : togglePreCallVideo()">
+						<button aria-label="Камера" @click="callInitiated ? toggleVideo() : togglePreCallVideo()">
 							<i :class="'icon-video'+(videoEnabled ? '' : '-off')"></i>
 						</button>
 						<button @click="toggleChat" v-if="callInitiated && chatEnabled"><i class="icon-chat"></i></button>
 						<button @click="toggleScreenShare" v-if="isScreenSharing" class="red"><i class="icon-screen"></i></button>
-						<button @click="toggleExtraControls"><i class="icon-more-vertical"></i></button>
+						<button aria-label="Настройки звонка" @click="toggleExtraControls"><i class="icon-more-vertical"></i></button>
 						<button class="join" v-if="!callInitiated" v-on:click="initiateCall">
 							<i class="icon-phone"></i>&nbsp; Набрать
 						</button>
 					</section>
-				</secion>
+				</section>
 			</div>
 		</main>
 	</body>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 	<%- include('head'); -%>
 
 	<body>
@@ -28,12 +28,13 @@
 			<script type="text/javascript">
 				const inputElement = document.querySelector("#channelbox input");
 				function onJoin() {
-					let channelId = document.querySelector("#channelbox input").value;
+					let channelId = document.querySelector("#channelbox input").value.trim();
 					if (!channelId) {
 						alert("Введите ID канала, созданный Telegram-ботом");
 						return;
 					}
-					window.location.pathname = channelId;
+					if (!/^[a-zA-Z0-9-]{1,63}$/.test(channelId)) { alert("Проверьте ID конференции"); return; }
+					window.location.pathname = "/" + encodeURIComponent(channelId);
 				}
 
 				inputElement.addEventListener("keypress", function (e) {

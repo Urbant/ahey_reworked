@@ -47,60 +47,36 @@ const setupPeerConnectionHandlers = (peerConnection, peer_id) => {
 	};
 };
 
+// Rank video codecs H.264 first, VP8 next as a
+// fallback for peers built without H.264 support.
+const codecRank = (codec) => {
+	const mimeType = codec.mimeType.toLowerCase();
+	if (mimeType === "video/h264") return 0;
+	if (mimeType === "video/vp8") return 1;
+	return 2;
+};
+
 const addLocalTracksToPeer = (peerConnection) => {
 	if (App.localMediaStream) {
 		App.localMediaStream.getTracks().forEach((track) => {
 			const sender = peerConnection.addTrack(track, App.localMediaStream);
 			// Set codec preferences for video tracks if supported
 			if (track.kind === "video" && window.RTCRtpSender && RTCRtpSender.getCapabilities) {
-				const codecs = RTCRtpSender.getCapabilities("video").codecs;
-				const preferredCodecs = codecs.filter((codec) => codec.mimeType.toLocaleLowerCase() === "video/h264");
+				const codecs = (RTCRtpSender.getCapabilities("video")?.codecs || []);
 				const transceiver = peerConnection.getTransceivers().find((t) => t.sender === sender);
-				if (transceiver && transceiver.setCodecPreferences && preferredCodecs.length) {
-					transceiver.setCodecPreferences(preferredCodecs);
+				if (transceiver && transceiver.setCodecPreferences && codecs.length) {
+					transceiver.setCodecPreferences([...codecs].sort((a, b) => codecRank(a) - codecRank(b)));
 				}
 			}
 		});
 	}
 };
 
-// Prefer H.264 codec in SDP for better Safari compatibility
-// WARNING: Avoid repeated calls to this function on the same SDP, as repeated reordering may cause interoperability issues with some clients.
-function preferH264(sdp) {
-	const sdpLines = sdp.split("\r\n");
-	const mLineIndex = sdpLines.findIndex((line) => line.startsWith("m=video"));
-	if (mLineIndex === -1) return sdp;
-
-	// Find all H264 payload types
-	const h264PayloadTypes = sdpLines
-		.filter((line) => line.startsWith("a=rtpmap") && line.toLowerCase().includes("h264"))
-		.map((line) => {
-			const match = line.match(/^a=rtpmap:(\d+)\s+H264/i);
-			return match ? match[1] : null;
-		})
-		.filter(Boolean);
-
-	if (h264PayloadTypes.length === 0) return sdp;
-
-	// Reorder m=video line to put H264 first
-	const mLineParts = sdpLines[mLineIndex].split(" ");
-	const newMLine = [
-		...mLineParts.slice(0, 3),
-		...h264PayloadTypes,
-		...mLineParts.slice(3).filter((pt) => !h264PayloadTypes.includes(pt)),
-	];
-	sdpLines[mLineIndex] = newMLine.join(" ");
-
-	return sdpLines.join("\r\n");
-}
-
 const setupOfferCreation = (peerConnection, peer_id) => {
 	peerConnection.onnegotiationneeded = () => {
 		peerConnection
 			.createOffer()
 			.then((localDescription) => {
-				// Prefer H.264 in SDP for Safari compatibility (Safari only supports H.264 for video)
-				localDescription.sdp = preferH264(localDescription.sdp);
 				peerConnection
 					.setLocalDescription(localDescription)
 					.then(() => {
@@ -120,11 +96,6 @@ const handleSessionDescription = (config) => {
 	const peer = App.peers[peer_id]["rtc"];
 	const remoteDescription = config.session_description;
 
-	// Prefer H.264 in SDP for Safari compatibility (Safari only supports H.264 for video)
-	if (remoteDescription && remoteDescription.sdp) {
-		remoteDescription.sdp = preferH264(remoteDescription.sdp);
-	}
-
 	const desc = new RTCSessionDescription(remoteDescription);
 	peer.setRemoteDescription(
 		desc,
@@ -132,8 +103,6 @@ const handleSessionDescription = (config) => {
 			if (remoteDescription.type == "offer") {
 				peer.createAnswer(
 					(localDescription) => {
-						// Prefer H.264 in SDP for Safari compatibility (Safari only supports H.264 for video)
-						localDescription.sdp = preferH264(localDescription.sdp);
 						peer.setLocalDescription(
 							localDescription,
 							() =>
@@ -213,6 +182,7 @@ window.initiateCall = () => {
 			setupOfferCreation(peerConnection, peer_id);
 		}
 	});
+
 
 	signalingSocket.on("sessionDescription", handleSessionDescription);
 	signalingSocket.on("iceCandidate", handleIceCandidate);
